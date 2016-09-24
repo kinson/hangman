@@ -78,7 +78,7 @@ Here's this module being exercised from an iex session:
     iex(3)> G.word_length(game)
     6
 
-    iex(4)> G.word_as_string_string(game)
+    iex(4)> G.word_as_string(game)
     "_ _ _ _ _ _"
 
     iex(5)> { game, state, guess } = G.make_move(game, "e")
@@ -107,7 +107,7 @@ Here's this module being exercised from an iex session:
 
     iex(13)> { game, state, guess } = G.make_move(game, "b")
     . . .
-    iex(14)> state                                          
+    iex(14)> state
     :bad_guess
 
     iex(15)> { game, state, guess } = G.make_move(game, "f")
@@ -142,6 +142,13 @@ Here's this module being exercised from an iex session:
 
   @spec new_game :: state
   def new_game do
+    r_word = Hangman.Dictionary.random_word
+    %{
+      word: r_word,
+      letters_left: num_letters_no_dups(r_word),
+      turns_left: 10,
+      guessed: []
+    }
   end
 
 
@@ -152,6 +159,12 @@ Here's this module being exercised from an iex session:
   """
   @spec new_game(binary) :: state
   def new_game(word) do
+    %{
+      word: word,
+      letters_left: num_letters_no_dups(word),
+      turns_left: 10,
+      guessed: []
+    }
   end
 
 
@@ -177,6 +190,11 @@ Here's this module being exercised from an iex session:
 
   @spec make_move(state, ch) :: { state, atom, optional_ch }
   def make_move(state, guess) do
+    state = %{state| turns_left: turns_left - 1, guessed: [guess | guessed]}
+    word_letters = String.codepoints word
+    guess_in_word = word_letters |> Enum.member? guess
+    all_letters_found = Enum.all? word_letters &(Enum.member state.guesses &1)
+    handle_guess(state, guess_in_word, all_letters_found)
   end
 
 
@@ -187,6 +205,7 @@ Here's this module being exercised from an iex session:
   """
   @spec word_length(state) :: integer
   def word_length(%{ word: word }) do
+    String.length(word)
   end
 
   @doc """
@@ -199,6 +218,7 @@ Here's this module being exercised from an iex session:
 
   @spec letters_used_so_far(state) :: [ binary ]
   def letters_used_so_far(state) do
+    state.guessed
   end
 
   @doc """
@@ -211,6 +231,7 @@ Here's this module being exercised from an iex session:
 
   @spec turns_left(state) :: integer
   def turns_left(state) do
+    state.turns_left
   end
 
   @doc """
@@ -224,6 +245,7 @@ Here's this module being exercised from an iex session:
 
   @spec word_as_string(state, boolean) :: binary
   def word_as_string(state, reveal \\ false) do
+    show_word(state, reveal)
   end
 
   ###########################
@@ -231,5 +253,25 @@ Here's this module being exercised from an iex session:
   ###########################
 
   # Your private functions go here
+
+  defp show_word(state, true) do
+    state.word
+  end
+  defp show_word(state, false) do
+    guessed_letters = [" " | state.guessed] |> Enum.join #empty string prevents regex error when no guesses
+    String.replace(state.word, ~r/[^#{guessed_letters}]/, "_")
+  end
+
+  defp num_letters_no_dups(word) do
+    String.codepoints(word)
+    |> Enum.uniq
+    |> Enum.count
+  end
+
+  defp handle_guess(state, _, true), do: :won
+  defp handle_guess(state, true, _), do: :good_guess
+  defp handle_guess(state, false, _), do: :bad_guess
+  #todo implement lost
+
 
  end

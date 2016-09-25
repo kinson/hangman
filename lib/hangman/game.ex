@@ -190,9 +190,8 @@ Here's this module being exercised from an iex session:
 
   @spec make_move(state, ch) :: { state, atom, optional_ch }
   def make_move(state, guess) do
-    state = %{state | turns_left: state.turns_left - 1}
-    state = %{state | guessed: [guess | state.guessed]}
     guess_in_word = String.codepoints(state.word) |> Enum.member?(guess)
+    state = manipulate_state(state, guess_in_word, guess)
     status = handle_guess(state, guess_in_word)
     {state, status, guess}
   end
@@ -247,6 +246,8 @@ Here's this module being exercised from an iex session:
   @spec word_as_string(state, boolean) :: binary
   def word_as_string(state, reveal \\ false) do
     show_word(state, reveal)
+    |> String.codepoints
+    |> Enum.join(" ")
   end
 
   ###########################
@@ -277,9 +278,23 @@ Here's this module being exercised from an iex session:
       :good_guess
     end
   end
-
   defp handle_guess(%{turns_left: 0}, false), do: :lost
   defp handle_guess(%{turns_left: turns_left}, false), do: :bad_guess
+
+  defp manipulate_state(state, true, guess) do
+    manipulate_state(state, guess)
+  end
+  defp manipulate_state(state, false, guess) do
+    state = %{state | turns_left: state.turns_left - 1}
+    manipulate_state(state, guess)
+  end
+  defp manipulate_state(state, guess) do
+    state = %{state | guessed: [guess | state.guessed]}
+    num_letters_left = num_letters_no_dups(state.word)
+    %{state | letters_left: num_letters_left}
+  end
+
+
 
 
  end

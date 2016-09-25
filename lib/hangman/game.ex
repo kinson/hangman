@@ -190,12 +190,13 @@ Here's this module being exercised from an iex session:
 
   @spec make_move(state, ch) :: { state, atom, optional_ch }
   def make_move(state, guess) do
-    state = %{state| turns_left: turns_left - 1, guessed: [guess | guessed]}
-    word_letters = String.codepoints word
-    guess_in_word = word_letters |> Enum.member? guess
-    all_letters_found = Enum.all? word_letters &(Enum.member state.guesses &1)
-    handle_guess(state, guess_in_word, all_letters_found)
+    state = %{state | turns_left: state.turns_left - 1}
+    state = %{state | guessed: [guess | state.guessed]}
+    guess_in_word = String.codepoints(state.word) |> Enum.member?(guess)
+    status = handle_guess(state, guess_in_word)
+    {state, status, guess}
   end
+  #todo: implement decrimenting letters_left, also dont decrement turns if correct guess
 
 
   @doc """
@@ -268,10 +269,17 @@ Here's this module being exercised from an iex session:
     |> Enum.count
   end
 
-  defp handle_guess(state, _, true), do: :won
-  defp handle_guess(state, true, _), do: :good_guess
-  defp handle_guess(state, false, _), do: :bad_guess
-  #todo implement lost
+  defp handle_guess(state, true) do
+    all_letters_found = String.codepoints(state.word) |> Enum.all?(&(Enum.member?(state.guessed, &1)))
+    if all_letters_found do
+      :won
+    else
+      :good_guess
+    end
+  end
+
+  defp handle_guess(%{turns_left: 0}, false), do: :lost
+  defp handle_guess(%{turns_left: turns_left}, false), do: :bad_guess
 
 
  end

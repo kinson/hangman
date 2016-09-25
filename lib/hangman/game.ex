@@ -195,8 +195,6 @@ Here's this module being exercised from an iex session:
     status = handle_guess(state, guess_in_word)
     {state, status, guess}
   end
-  #todo: implement decrimenting letters_left, also dont decrement turns if correct guess
-
 
   @doc """
   `len = Hangman.Game.word_length(game)`
@@ -289,9 +287,8 @@ Here's this module being exercised from an iex session:
     manipulate_state(state, guess)
   end
   defp manipulate_state(state, guess) do
-    state = %{state | guessed: [guess | state.guessed]}
     num_letters_left = num_letters_no_dups(state.word)
-    %{state | letters_left: num_letters_left}
+    %{state | guessed: [guess | state.guessed], letters_left: num_letters_left}
   end
 
 

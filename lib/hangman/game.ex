@@ -271,6 +271,7 @@ Here's this module being exercised from an iex session:
   defp handle_guess(state, true) do
     all_letters_found = String.codepoints(state.word) |> Enum.all?(&(Enum.member?(state.guessed, &1)))
     if all_letters_found do
+      IO.puts "won"
       :won
     else
       :good_guess
@@ -290,8 +291,5 @@ Here's this module being exercised from an iex session:
     num_letters_left = num_letters_no_dups(state.word)
     %{state | guessed: [guess | state.guessed], letters_left: num_letters_left}
   end
-
-
-
 
  end

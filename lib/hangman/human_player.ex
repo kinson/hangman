@@ -17,11 +17,11 @@ defmodule Hangman.HumanPlayer do
   end
 
 
-  defp get_next_move({state, :won, nil}) do
+  defp get_next_move({state, :won, _nil}) do
     IO.puts "\nCONGRATULATIONS! The word was #{Game.word_as_string(state)}"
   end
 
-  defp get_next_move({state, :lost, nil}) do
+  defp get_next_move({state, :lost, _nil}) do
     clear_screen
     IO.puts drawing(0)
     IO.puts "\nSorry, you lose. The word was: #{Game.word_as_string(state, true)}"
@@ -232,7 +232,3 @@ defmodule Hangman.HumanPlayer do
   end
 
 end
-
-
-
-

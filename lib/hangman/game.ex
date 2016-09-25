@@ -277,7 +277,7 @@ Here's this module being exercised from an iex session:
     end
   end
   defp handle_guess(%{turns_left: 0}, false), do: :lost
-  defp handle_guess(%{turns_left: turns_left}, false), do: :bad_guess
+  defp handle_guess(%{turns_left: _turns_left}, false), do: :bad_guess
 
   defp manipulate_state(state, true, guess) do
     manipulate_state(state, guess)
